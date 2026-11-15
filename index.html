@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WFG — Non-Dungeon Weapon Power Baseline</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+html,body{margin:0;background:#0e1117;color:#e6edf3;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1500px;margin:auto;padding:28px}
+h1{margin:0 0 6px;font-size:28px}.sub{color:#8b949e;margin-bottom:18px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:14px;padding:14px 14px 6px}
+#chart{width:100%;height:70vh;min-height:520px}
+.note{font-size:13px;color:#8b949e;margin-top:12px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.stat{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:12px}
+.label{font-size:12px;color:#8b949e}.value{font-size:18px;margin-top:3px}
+@media(max-width:700px){.wrap{padding:14px}.stats{grid-template-columns:1fr}.value{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>WoW Forever — Non-Dungeon Primary Weapon Power</h1>
+<div class="sub">Baseline snapshot · 9 specs · checkpoints 10–60 · pre-audit</div>
+<div class="card"><div id="chart"></div></div>
+<div class="stats">
+  <div class="stat"><div class="label">Highest average</div><div class="value" id="best"></div></div>
+  <div class="stat"><div class="label">Worst single checkpoint</div><div class="value" id="worst"></div></div>
+  <div class="stat"><div class="label">Data status</div><div class="value">Baseline / not final</div></div>
+</div>
+<div class="note">
+Score = best legal non-dungeon weapon-package score ÷ best all-source weapon-package score × 100.
+This is the frozen 2026-11-15 graph baseline, not the audited final result.
+</div>
+</div>
+<script>
+const levels=[10,11,15,17,20,24,28,30,34,38,40,45,50,55,58,60];
+const series={
+"Ret Paladin":[100,100,100,99.96,100,100,100,99.37,99.37,100,100,100,100,92.57,100,100],
+"Combat Rogue":[100,100,100,94.82,94.9,100,100,100,100,100,100,100,100,100,100,100],
+"Feral Cat Druid":[100,100,72.41,100,94.15,100,85.3,100,100,100,100,100,100,94.71,100,100],
+"Enhancement Shaman":[100,100,100,100,100,97.03,100,97.06,96.17,100,100,100,100,93.83,100,100],
+"BM Hunter":[100,100,100,100,100,100,100,89.88,89.01,100,100,100,100,91.4,99.41,100],
+"Arms Warrior":[100,100,100,100,100,99.45,100,100,100,99.17,98.96,100,100,88.04,96.85,100],
+"Shadow Priest":[100,100,50,55.8,100,100,96.78,90.22,85.22,100,100,100,94.1,98.8,81.76,80.18],
+"Frost Mage":[100,100,51.11,37.1,95.64,90.34,92.77,90.63,79.92,100,100,100,90.12,86.38,100,100],
+"Affliction Warlock":[100,100,46,100,100,94.81,94.41,92.73,77.56,100,100,100,87.03,88.28,79.77,79.09]
+};
+const order=Object.keys(series);
+const colors=["#ffcc66","#66c2ff","#b88cff","#71d49b","#ff7f7f","#b0b7c3","#9f8fff","#5bd6d6","#f5a6e6"];
+const traces=order.map((name,i)=>({
+x:levels,y:series[name],name,mode:"lines+markers",
+line:{width:2.5,color:colors[i]},marker:{size:6},
+hovertemplate:"<b>"+name+"</b><br>Level %{x}<br>Non-dungeon: %{y:.2f}%<extra></extra>"
+}));
+Plotly.newPlot("chart",traces,{
+paper_bgcolor:"#161b22",plot_bgcolor:"#161b22",font:{color:"#e6edf3"},
+margin:{l:55,r:25,t:20,b:75},hovermode:"x unified",
+xaxis:{title:"Level",tickmode:"array",tickvals:levels,gridcolor:"#30363d",zeroline:false},
+yaxis:{title:"Non-dungeon weapon power (%)",range:[30,100],gridcolor:"#30363d",zeroline:false},
+legend:{orientation:"h",y:-0.18},
+hoverlabel:{bgcolor:"#0e1117",font:{color:"#e6edf3"}}},
+{responsive:true,displaylogo:false});
+
+const stats=order.map(name=>{const vals=series[name];const min=Math.min(...vals);return{name,avg:vals.reduce((a,b)=>a+b,0)/vals.length,min,minLevel:levels[vals.indexOf(min)]}});
+stats.sort((a,b)=>b.avg-a.avg);
+const w=stats.reduce((a,b)=>a.min<b.min?a:b);
+document.getElementById("best").textContent=stats[0].name+" · "+stats[0].avg.toFixed(2)+"% avg";
+document.getElementById("worst").textContent=w.name+" · "+w.min.toFixed(2)+"% at level "+w.minLevel;
+</script>
+</body>
+</html>
