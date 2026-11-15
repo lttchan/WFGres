@@ -15,3 +15,12 @@ This first version is the frozen **2026-11-15 pre-audit baseline**:
 The baseline is intentionally preserved as a presentation snapshot while the underlying research is audited in the private WFG repository.
 
 Source data is included in `data/`.
+
+
+## Planned audit controls
+
+The audited version will use two acquisition modes:
+- **AH OFF** — self-acquired gear only.
+- **AH ON/OFF — ON = you have a fat wallet LOL** — optional market-enabled sensitivity view.
+
+The current public graph is still the frozen pre-audit baseline.
