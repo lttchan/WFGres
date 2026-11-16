@@ -63,11 +63,29 @@ const chart=document.getElementById("chart");
 const offBtn=document.getElementById("offBtn");
 const onBtn=document.getElementById("onBtn");
 const modeNote=document.getElementById("modeNote");
+const visibilityKey="wfgres-spec-visibility-v1";
+
+let legendVisibility={};
+try{
+  const saved=JSON.parse(localStorage.getItem(visibilityKey)||"{}");
+  if(saved && typeof saved==="object") legendVisibility=saved;
+}catch{}
+
+function saveLegendVisibility(){
+  if(!chart.data) return;
+  chart.data.forEach((trace,i)=>{
+    const spec=classes[i][0];
+    legendVisibility[spec]=(trace.visible===undefined?true:trace.visible);
+  });
+  try{localStorage.setItem(visibilityKey,JSON.stringify(legendVisibility));}catch{}
+}
 
 function render(mode){
+  saveLegendVisibility();
   const data=mode==="off"?off:on;
   const traces=classes.map(([spec,name,color])=>({
     x:levels,y:data[spec],name,mode:"lines+markers",
+    visible:Object.prototype.hasOwnProperty.call(legendVisibility,spec)?legendVisibility[spec]:true,
     line:{width:2.6,color},marker:{size:6},
     hovertemplate:"<b>"+name+"</b><br>Level %{x}<br>Non-dungeon: %{y:.2f}%<extra></extra>"
   }));
@@ -95,6 +113,8 @@ function render(mode){
     modeNote.textContent="AH ON market-sensitivity view — not a second 144-point source audit.";
   }
 }
+chart.on("plotly_legendclick",()=>setTimeout(saveLegendVisibility,0));
+chart.on("plotly_legenddoubleclick",()=>setTimeout(saveLegendVisibility,0));
 offBtn.onclick=()=>render("off");
 onBtn.onclick=()=>render("on");
 render("off");
